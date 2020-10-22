@@ -10,10 +10,10 @@ namespace LaboratorApriori
     {
         static string[,] ReadCSVFile(string fisier)
         {
-            string cale = @"./../../InputData/";
-            string locatie = cale + fisier;
+            string cale = @"./../../InputData/" + fisier;
+            
 
-            string[] dateFisier = System.IO.File.ReadAllLines(locatie);
+            string[] dateFisier = System.IO.File.ReadAllLines(cale);
 
             int randuri = dateFisier.Length;
             int coloane = dateFisier[0].Split(',').Length;
@@ -26,7 +26,7 @@ namespace LaboratorApriori
                 for(int j = 0; j < coloane; j++)
                 {
                     continutCelule[i, j] = linie[j];
-                    Console.Write(continutCelule[i, j]);
+                    
                 }
 
             }
