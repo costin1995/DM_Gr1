@@ -34,6 +34,7 @@ namespace LaboratorApriori
             return continutCelule;
         }
 
+            int nrRows = mat.GetLength(0);
         static void Main(string[] args)
         {
             Console.WriteLine("!!!!Hello World si spor la scris, dragi mei coechipieri!!!!!");
