@@ -34,7 +34,32 @@ namespace LaboratorApriori
             return continutCelule;
         }
 
+        static Dictionary<string, int> GetStatistics(string[,] mat)
+        {
+
+            Dictionary<string, int> aux = new Dictionary<string, int>();
             int nrRows = mat.GetLength(0);
+            int nrCols = mat.GetLength(1);
+
+            for (int i = 0; i < nrRows; i++)
+            {
+                for (int j = 0; j < nrCols; j++)
+                {
+                    if (mat[i, j] != "-" && !aux.ContainsKey(mat[i, j]))
+                    {
+                        aux.Add(mat[i, j], 1);
+                    }
+                    else if (aux.ContainsKey(mat[i, j]))
+                    {
+                        aux[mat[i, j]]++;
+                    }
+                }
+            }
+
+
+            return aux;
+        }
+
         static void Main(string[] args)
         {
             Console.WriteLine("!!!!Hello World si spor la scris, dragi mei coechipieri!!!!!");
