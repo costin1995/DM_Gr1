@@ -60,6 +60,30 @@ namespace LaboratorApriori
             return aux;
         }
 
+        static string[,]EliminaCapTabel(string[,] matrice)
+        {
+            int rand = matrice.GetLength(0)-1;
+            int coloana = matrice.GetLength(1)-1;
+            string[,] matx = new string[rand,coloana];
+
+            for(int i =0;i<rand;i++)
+            {
+                for(int j=0;j<coloana;j++)
+                {
+                    if(matrice[i+1,j+1] = "?")
+                    {
+                        matrice[i+1,j+1]= "-";
+                    }
+                    
+                    matx[i,j]=matrice[i+1,j+1];
+                    
+                }
+            }
+
+            return matx;
+
+        }
+
         static void Main(string[] args)
         {
             Console.WriteLine("!!!!Hello World si spor la scris, dragi mei coechipieri!!!!!");
