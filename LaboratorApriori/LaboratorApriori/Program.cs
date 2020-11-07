@@ -70,7 +70,7 @@ namespace LaboratorApriori
             {
                 for(int j=0;j<coloana;j++)
                 {
-                    if(matrice[i+1,j+1] = "?")
+                    if(matrice[i+1,j+1] == "?")
                     {
                         matrice[i+1,j+1]= "-";
                     }
