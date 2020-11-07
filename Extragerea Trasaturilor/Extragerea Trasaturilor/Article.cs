@@ -52,6 +52,8 @@ namespace Extragerea_Trasaturilor
         public string GetXmlNodeContentByName(XmlDocument Obj, string NumeNod)
         {
             string Info = "";
+            
+            
 
 
             return Info;
