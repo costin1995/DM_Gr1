@@ -3,12 +3,12 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-
+using System.Xml;
 namespace Extragerea_Trasaturilor
 {
     class Article
     {
-        public string Tile;
+        private string Tile;
         private string Text;
         private List<string> ClassCodes = new List<string>();
 
@@ -49,6 +49,27 @@ namespace Extragerea_Trasaturilor
             ClassCodes=classCodes;
         }
 
+        public string GetXmlNodeContentByName(XmlDocument Obj, string NumeNod)
+        {
+            string Info = "";
 
+
+            return Info;
+        }
+
+        public List<string> GetClassCodesFromXml(XmlDocument Obj)
+        {
+            List<string> NoduriCodesCareContinClasaBipTopics = new List<string>();
+
+
+            return NoduriCodesCareContinClasaBipTopics;
+        }
+
+        public List<Article> VerificareSiInstantiereFisiereXml(string CaleRelativaCatreFolderCuFisiere)
+        {
+            List<Article> ListaFisiereXml = new List<Article>();
+
+            return ListaFisiereXml;
+        }
     }
 }
