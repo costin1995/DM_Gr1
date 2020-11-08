@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Xml;
 namespace Extragerea_Trasaturilor
 {
-    class Article
+    public class Article
     {
         private string Tile;
         private string Text;
@@ -36,24 +36,24 @@ namespace Extragerea_Trasaturilor
 
         public void SetTitle(string tile)
         {
-            Tile=tile;
+            Tile = tile;
         }
 
         public void SetText(string text)
         {
-            Text=text;
+            Text = text;
         }
 
         public void SetClassCodes(List<string> classCodes)
         {
-            ClassCodes=classCodes;
+            ClassCodes = classCodes;
         }
 
         public string GetXmlNodeContentByName(XmlDocument Obj, string NumeNod)
         {
             string Info = "";
-            
-            
+
+
 
 
             return Info;
