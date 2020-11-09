@@ -55,7 +55,7 @@ namespace Extragerea_Trasaturilor
 
         //======End metode pentru a extrage cuvintele din string===============
 
-        public void ReadFileInList(out List<string> lines,string filePath)
+        public void ReadFileInList(out List<string> lines, string filePath)
         {
             lines = new List<string>();
             string line;
@@ -84,7 +84,7 @@ namespace Extragerea_Trasaturilor
             return false;
         }
 
-        public bool IsInGlobalDictionary(string word) 
+        public bool IsInGlobalDictionary(string word)
         {
             foreach (string str in globalDictionary)
             {
@@ -101,36 +101,39 @@ namespace Extragerea_Trasaturilor
             return (globalDictionary.IndexOf(word)); // returneaza index-ul cuv din globalDictionary
         }
 
-        public void RareVectors(List<Dictionary<int, int>> vectoriRari,int key)
+        public void RareVector(Dictionary<int, int> dictionary, int key)
         {
-            foreach (Dictionary<int, int> v in vectoriRari)
+
+            if (dictionary.ContainsKey(key))
             {
-                if (v.ContainsKey(key))  
-                {
-                    v[key]++; //verific daca exista cheia si daca da o incrementez
-                                    //cheia(key) este indexul din vectorul global globalDictionary
-                }
-                else
-                {
-                    v.Add(key, 0); //daca nu exista cheia o adaug cu valuarea 1, deoarece aprare 1 data cuvantul
-                }
+                int tempValue;
+                dictionary.TryGetValue(key, out tempValue); 
+                dictionary[key] = tempValue + 1; //verific daca exista cheia si daca da o incrementez
+                                                 //cheia(key) este indexul din vectorul global globalDictionary
+
             }
+            else
+            {
+                dictionary.Add(key, 1); //daca nu exista cheia o adaug cu valuarea 1, deoarece aprare 1 data cuvantul
+            }
+
         }
 
-        public List<Dictionary<int, int>>CreateGlobalVectorAndRareVectors(List<Article> articleList)
+        public List<Dictionary<int, int>> CreateGlobalVectorAndRareVectors(List<Article> articleList)
         {
             List<Dictionary<int, int>> vectoriRari = new List<Dictionary<int, int>>();
 
             string filePath = @"./../../InputData/stopwords.txt";
             ReadFileInList(out stopwords, filePath); //citire si punere in lista a tuturor stepwords
-                                                        //fac acest lucru aici ca sa nu citesc fisierul de fiecare data
-                                                        //cand trebuie sa verific daca un cuvant este sau nu stopword
-                                                    //Citesc 1 data si pun intr-o lista cu care lucrez mereu
-                                                    //Lista este o lista globala de string "List<string> stopwords"
+                                                     //fac acest lucru aici ca sa nu citesc fisierul de fiecare data
+                                                     //cand trebuie sa verific daca un cuvant este sau nu stopword
+                                                     //Citesc 1 data si pun intr-o lista cu care lucrez mereu
+                                                     //Lista este o lista globala de string "List<string> stopwords"
 
 
             foreach (Article article in articleList)
             {
+                Dictionary<int, int> tempDictionary = new Dictionary<int, int>();
                 string[] titleWords = GetWords(article.GetTitle());
                 string[] textWords = GetWords(article.GetText());
 
@@ -146,8 +149,8 @@ namespace Extragerea_Trasaturilor
                         }
 
                         int indexGlobalDictionary = IndexOfTheWordInGlobalDictionary(wordRoot);
-                        RareVectors(vectoriRari, indexGlobalDictionary); //incrementeaza sau introduce in vector rar
-                        
+                        RareVector(tempDictionary, indexGlobalDictionary); //incrementeaza sau introduce in vector rar
+
                     }
                 }
 
@@ -163,15 +166,14 @@ namespace Extragerea_Trasaturilor
                         }
 
                         int indexGlobalDictionary = IndexOfTheWordInGlobalDictionary(wordRoot);
-                        RareVectors(vectoriRari, indexGlobalDictionary); //incrementeaza sau introduce in vector rar
+                        RareVector(tempDictionary, indexGlobalDictionary); //incrementeaza sau introduce in vector rar
 
                     }
                 }
-
+                vectoriRari.Add(tempDictionary);
             }
 
             return vectoriRari;
         }
-
     }
 }
