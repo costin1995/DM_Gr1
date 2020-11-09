@@ -14,6 +14,9 @@ namespace Extragerea_Trasaturilor
 {
     public partial class Form1 : Form
     {
+        List<string> globalDictionary;
+        List<string> stopwords;
+        private PorterStemmer porterStemmer;
         public Form1()
         {
             InitializeComponent();
