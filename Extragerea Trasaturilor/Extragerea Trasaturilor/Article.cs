@@ -55,7 +55,10 @@ namespace Extragerea_Trasaturilor
         {
             string Info = "";
             
-            
+            foreach(XmlNode xmlNode in Obj)
+            {
+                Info += xmlNode[NumeNod].InnerText;
+            }
 
             return Info;
         }
