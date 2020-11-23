@@ -11,14 +11,16 @@ namespace Extragerea_Trasaturilor
     {
         private string Tile;
         private string Text;
+        private string Data_Set;
         private List<string> ClassCodes = new List<string>();
 
 
-        public Article(string tile1, string text1, List<string> classCodes1)
+        public Article(string tile1, string text1, List<string> classCodes1, string dataset)
         {
             Tile = tile1;
             Text = text1;
             ClassCodes = classCodes1;
+            Data_Set = dataset;
         }
 
         public string GetTitle()
@@ -51,7 +53,7 @@ namespace Extragerea_Trasaturilor
             ClassCodes = classCodes;
         }
 
-        public string GetXmlNodeContentByName(XmlDocument Obj, string NumeNod)
+        public static string GetXmlNodeContentByName(XmlDocument Obj, string NumeNod)
         {
             string Info = "";
             
@@ -63,7 +65,7 @@ namespace Extragerea_Trasaturilor
             return Info;
         }
 
-        public List<string> GetClassCodesFromXml(XmlDocument Obj)
+        public static List<string> GetClassCodesFromXml(XmlDocument Obj)
         {
             List<string> NoduriCodesCareContinClasaBipTopics = new List<string>();
             
@@ -81,12 +83,21 @@ namespace Extragerea_Trasaturilor
             return NoduriCodesCareContinClasaBipTopics;
         }
 
-        public List<Article> VerificareSiInstantiereFisiereXml(string CaleRelativaCatreFolderCuFisiere)
+        public static List<Article> VerificareSiInstantiereFisiereXml(string CaleRelativaCatreFolderCuFisiere)
         {
             List<Article> ListaFisiereXml = new List<Article>();
             string cale = "./../../InputData/" + CaleRelativaCatreFolderCuFisiere;
+            string folder = ""; 
             XmlDocument xmlDocument = new XmlDocument();
 
+            if (CaleRelativaCatreFolderCuFisiere.Contains("Training"))
+            {
+                folder = "training";
+            }
+            if (CaleRelativaCatreFolderCuFisiere.Contains("Testing"))
+            {
+                folder = "testing";
+            }
 
             string[] AllDirectories = Directory.GetFiles(cale, "*", SearchOption.AllDirectories);
             
@@ -94,12 +105,14 @@ namespace Extragerea_Trasaturilor
             {
                 if(AllDirectories[i].EndsWith("xml"))
                 {
-                    xmlDocument.LoadXml(AllDirectories[i]);
+                    xmlDocument.LoadXml(AllDirectories[i]);                 
                     Article obj = new Article(GetXmlNodeContentByName(xmlDocument,"title"),
                                               GetXmlNodeContentByName(xmlDocument,"text"),
-                                              GetClassCodesFromXml(xmlDocument));
+                                              GetClassCodesFromXml(xmlDocument),
+                                              folder);
 
                     ListaFisiereXml.Add(obj);
+                    folder = "";
                 }
             }
 

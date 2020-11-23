@@ -17,6 +17,8 @@ namespace Extragerea_Trasaturilor
         List<string> globalDictionary;
         List<string> stopwords;
         private PorterStemmer porterStemmer;
+        List<Article> ListaXml = new List<Article>();
+        List<Dictionary<int, int>> vectRar = new List<Dictionary<int, int>>();
         public Form1()
         {
             InitializeComponent();
@@ -172,6 +174,14 @@ namespace Extragerea_Trasaturilor
             }
 
             return vectoriRari;
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        {
+            ListaXml =  Article.VerificareSiInstantiereFisiereXml("Reuters_34");
+            vectRar = CreateGlobalVectorAndRareVectors(ListaXml);
+            using (StreamWriter fisier = new StreamWriter(@"./../../InputData/fisier.txt"))
+                fisier.WriteLine(vectRar);
         }
     }
 }
