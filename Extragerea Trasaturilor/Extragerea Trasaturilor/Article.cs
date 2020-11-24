@@ -63,71 +63,79 @@ namespace Extragerea_Trasaturilor
             ClassCodes = classCodes;
         }
 
-        public static string GetXmlNodeContentByName(XmlDocument Obj, string NumeNod)
+        public static string GetXmlNodeContentByName(XmlDocument obj, string numeNod)
         {
-            string Info = "";
-            
-            foreach(XmlNode xmlNode in Obj)
-            {
-                Info += xmlNode[NumeNod].InnerText;
-            }
+            string info = "";
 
-            return Info;
+            XmlNode nodeTitle = obj.DocumentElement.SelectSingleNode(numeNod);
+            info += nodeTitle.InnerText;
+
+            return info;
         }
 
-        public static List<string> GetClassCodesFromXml(XmlDocument Obj)
+        public static List<string> GetClassCodesFromXml(XmlDocument obj)
         {
-            List<string> NoduriCodesCareContinClasaBipTopics = new List<string>();
-            
+            List<string> noduriCodesCareContinClasaBipTopics = new List<string>();
 
-            foreach (XmlNode xmlNode in Obj.SelectNodes("codes"))
+            XmlNode nodMetadataParinteCodes = obj.DocumentElement.SelectSingleNode("metadata");
+            XmlNodeList noduriCodesCopilMetadata = nodMetadataParinteCodes.ChildNodes;
+
+            foreach (XmlNode nodCodes in noduriCodesCopilMetadata)
             {
-                if (xmlNode.Attributes.Equals("bip:topics:1.0"))
+                foreach (XmlAttribute atributNoduCodes in nodCodes.Attributes)
                 {
-                    string aux = xmlNode.ChildNodes.ToString();
-                    NoduriCodesCareContinClasaBipTopics.Add(aux);
+                    if (atributNoduCodes.Value.Equals("bip:topics:1.0"))
+                    {
+                        XmlNodeList noduriCopilCodes = nodCodes.ChildNodes;
+
+                        foreach (XmlNode noduriCode in noduriCopilCodes)
+                        {
+                            foreach (XmlAttribute atributNoduriCode in noduriCode.Attributes)
+                            {
+                                string auxString = atributNoduriCode.Value;
+                                noduriCodesCareContinClasaBipTopics.Add(auxString);
+                            }
+                        }
+                    }
                 }
             }
 
-
-            return NoduriCodesCareContinClasaBipTopics;
+            return noduriCodesCareContinClasaBipTopics;
         }
 
-        public static List<Article> VerificareSiInstantiereFisiereXml(string CaleRelativaCatreFolderCuFisiere)
+        public static List<Article> VerificareSiInstantiereFisiereXml(string caleRelativaCatreFolderCuFisiere)
         {
-            List<Article> ListaFisiereXml = new List<Article>();
-            string cale = "./../../InputData/" + CaleRelativaCatreFolderCuFisiere;
-            string folder = ""; 
+            List<Article> listaFisiereXml = new List<Article>();
+            string cale = "./../../InputData/" + caleRelativaCatreFolderCuFisiere;
+            string folder = "";
             XmlDocument xmlDocument = new XmlDocument();
+            string[] allDirectories = Directory.GetFiles(cale, "*", SearchOption.AllDirectories);
 
-            if (CaleRelativaCatreFolderCuFisiere.Contains("Training"))
+            for (var i = 0; i < allDirectories.Length; i++)
             {
-                folder = "training";
-            }
-            if (CaleRelativaCatreFolderCuFisiere.Contains("Testing"))
-            {
-                folder = "testing";
-            }
-
-            string[] AllDirectories = Directory.GetFiles(cale, "*", SearchOption.AllDirectories);
-            
-            for(var i = 0; i < AllDirectories.Length; i++)
-            {
-                if(AllDirectories[i].EndsWith("xml"))
+                if (allDirectories[i].EndsWith("XML"))
                 {
-                    xmlDocument.LoadXml(AllDirectories[i]);                 
-                    Article obj = new Article(GetXmlNodeContentByName(xmlDocument,"title"),
-                                              GetXmlNodeContentByName(xmlDocument,"text"),
+                    if (allDirectories[i].Contains("Training"))
+                    {
+                        folder = "training";
+                    }
+                    if (allDirectories[i].Contains("Testing"))
+                    {
+                        folder = "testing";
+                    }
+
+                    xmlDocument.Load(allDirectories[i]);
+                    Article obj = new Article(GetXmlNodeContentByName(xmlDocument, "title"),
+                                              GetXmlNodeContentByName(xmlDocument, "text"),
                                               GetClassCodesFromXml(xmlDocument),
                                               folder);
 
-                    ListaFisiereXml.Add(obj);
+                    listaFisiereXml.Add(obj);
                     folder = "";
                 }
             }
 
-
-            return ListaFisiereXml;
+            return listaFisiereXml;
         }
     }
 }

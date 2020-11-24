@@ -180,13 +180,20 @@ namespace Extragerea_Trasaturilor
         {
             ListaXml = Article.VerificareSiInstantiereFisiereXml("Reuters_34");
             vectRar = CreateGlobalVectorAndRareVectors(ListaXml);
-            string data = "@data";
-            string linie = "";
-            using (StreamWriter fisier = new StreamWriter(@"./../../InputData/fisier.txt"))
+
+            using (StreamWriter fisier = new StreamWriter(@"./../../InputData/trasaturiExtraseFisiereXML.txt"))
 
                 for (var i = 0; i < vectRar.Count(); i++)
                 {
-                   
+                    string linie;
+                    if (i == 0)
+                    {
+                        linie = "@data\n\n";
+                    }
+                    else
+                    {
+                        linie = "";
+                    }
                     foreach (KeyValuePair<int, int> kvp in vectRar[i])
                     {
                         linie = linie + kvp.Key.ToString() + ":" + kvp.Value.ToString() + " ";
@@ -195,13 +202,14 @@ namespace Extragerea_Trasaturilor
                     linie = linie + "#";
                     foreach (string v in temp)
                     {
-                        linie = linie + v;
+                        linie = linie + " " + v;
                     }
-                    linie = linie + "#" + ListaXml[i].GetData_Set();
-                    fisier.WriteLine(data+linie);
-                    data = "";
-                    linie = "";
+                    linie = linie + " # " + ListaXml[i].GetData_Set();
+                    fisier.WriteLine(linie);
+
                 }
+
+            MessageBox.Show("File is write", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         }
