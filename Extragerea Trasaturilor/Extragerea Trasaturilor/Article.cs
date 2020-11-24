@@ -28,6 +28,11 @@ namespace Extragerea_Trasaturilor
             return Tile;
         }
 
+        public string GetData_Set()
+        {
+            return Data_Set;
+        }
+
         public string GetText()
         {
             return Text;
@@ -41,6 +46,11 @@ namespace Extragerea_Trasaturilor
         public void SetTitle(string tile)
         {
             Tile = tile;
+        }
+
+        public void SetData_Set(string dataset)
+        {
+            Data_Set = dataset;
         }
 
         public void SetText(string text)

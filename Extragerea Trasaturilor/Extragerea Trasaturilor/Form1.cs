@@ -107,7 +107,7 @@ namespace Extragerea_Trasaturilor
             if (dictionary.ContainsKey(key))
             {
                 int tempValue;
-                dictionary.TryGetValue(key, out tempValue); 
+                dictionary.TryGetValue(key, out tempValue);
                 dictionary[key] = tempValue + 1; //verific daca exista cheia si daca da o incrementez
                                                  //cheia(key) este indexul din vectorul global globalDictionary
 
@@ -178,10 +178,33 @@ namespace Extragerea_Trasaturilor
 
         private void button1_Click(object sender, EventArgs e)
         {
-            ListaXml =  Article.VerificareSiInstantiereFisiereXml("Reuters_34");
+            ListaXml = Article.VerificareSiInstantiereFisiereXml("Reuters_34");
             vectRar = CreateGlobalVectorAndRareVectors(ListaXml);
+            string data = "@data";
+            string linie = "";
             using (StreamWriter fisier = new StreamWriter(@"./../../InputData/fisier.txt"))
-                fisier.WriteLine(vectRar);
+
+                for (var i = 0; i < vectRar.Count(); i++)
+                {
+                   
+                    foreach (KeyValuePair<int, int> kvp in vectRar[i])
+                    {
+                        linie = linie + kvp.Key.ToString() + ":" + kvp.Value.ToString() + " ";
+                    }
+                    List<string> temp = ListaXml[i].GetClassCodes();
+                    linie = linie + "#";
+                    foreach (string v in temp)
+                    {
+                        linie = linie + v;
+                    }
+                    linie = linie + "#" + ListaXml[i].GetData_Set();
+                    fisier.WriteLine(data+linie);
+                    data = "";
+                    linie = "";
+                }
         }
-    }
-}
+
+        }
+        } 
+    
+
