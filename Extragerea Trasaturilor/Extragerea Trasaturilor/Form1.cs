@@ -226,6 +226,7 @@ namespace Extragerea_Trasaturilor
 
         public Dictionary<int, int> NormalizareBinara(Dictionary<int, int> vectorRar)
         {
+
             Dictionary<int, int> vectorNormalizat = new Dictionary<int, int>();
 
             foreach (KeyValuePair<int, int> kvp in vectorRar)
@@ -243,6 +244,9 @@ namespace Extragerea_Trasaturilor
 
             return vectorNormalizat;
         }
+
+       
+
 
     }
 }
