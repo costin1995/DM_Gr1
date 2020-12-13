@@ -212,17 +212,36 @@ namespace Extragerea_Trasaturilor
             MessageBox.Show("File is write", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-
         public double Entropia(Dictionary<string, int> repartitiaPeClase, double nrTotalElmente)
         {
             double valEntropie = 0;
             foreach (KeyValuePair<string, int> kvp in repartitiaPeClase)
             {
-               double logarithm = Math.Log(((double)kvp.Value / nrTotalElmente), 2);
+                double logarithm = Math.Log(((double)kvp.Value / nrTotalElmente), 2);
                 valEntropie -= ((double)kvp.Value / nrTotalElmente) * logarithm;
             }
 
             return valEntropie;
+        }
+
+        public Dictionary<int, int> NormalizareBinara(Dictionary<int, int> vectorRar)
+        {
+            Dictionary<int, int> vectorNormalizat = new Dictionary<int, int>();
+
+            foreach (KeyValuePair<int, int> kvp in vectorRar)
+            {
+                if (kvp.Value == 0)
+                {
+                    vectorNormalizat[kvp.Key] = 0;
+                }
+                else 
+                {
+                    vectorNormalizat[kvp.Key] = 1;
+                }
+                
+            }
+
+            return vectorNormalizat;
         }
 
     }
