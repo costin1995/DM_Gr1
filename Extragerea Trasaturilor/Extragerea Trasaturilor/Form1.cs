@@ -212,7 +212,20 @@ namespace Extragerea_Trasaturilor
             MessageBox.Show("File is write", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
+
+        public double Entropia(Dictionary<string, int> repartitiaPeClase, double nrTotalElmente)
+        {
+            double valEntropie = 0;
+            foreach (KeyValuePair<string, int> kvp in repartitiaPeClase)
+            {
+               double logarithm = Math.Log(((double)kvp.Value / nrTotalElmente), 2);
+                valEntropie -= ((double)kvp.Value / nrTotalElmente) * logarithm;
+            }
+
+            return valEntropie;
         }
-        } 
-    
+
+    }
+}
+
 
