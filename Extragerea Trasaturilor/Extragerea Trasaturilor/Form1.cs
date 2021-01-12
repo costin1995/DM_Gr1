@@ -19,6 +19,12 @@ namespace Extragerea_Trasaturilor
         private PorterStemmer porterStemmer;
         List<Article> ListaXml = new List<Article>();
         List<Dictionary<int, int>> vectRar = new List<Dictionary<int, int>>();
+        Dictionary<string, int> RepartiePeClase = new Dictionary<string, int>();
+        int NrArticoleClasa = 0;
+        double NrArticoleTotal = 0;
+
+        
+
         public Form1()
         {
             InitializeComponent();
@@ -244,6 +250,55 @@ namespace Extragerea_Trasaturilor
 
             return vectorNormalizat;
         }
+
+        public void RepartitiePeClase()
+        {
+            StreamReader streamReader = new StreamReader("./../../Inputdata/trasaturiExtraseFisiereXML.txt");
+            string linieDinFisier;
+
+            while ((linieDinFisier = streamReader.ReadLine()) != null)
+            {
+                if ((linieDinFisier.StartsWith("@")) || (linieDinFisier == ""));
+                else
+                {
+                    int index = linieDinFisier.IndexOf("#");
+                    string[] t = linieDinFisier.Substring(0, index - 1).Split();
+                    string[] v = linieDinFisier.Substring(index).Split();
+                    string clasa = "";
+                    for (int i = 0; i < v.Length; i++)
+                    {
+                        if (v[i].StartsWith("C"))
+                        {
+                            clasa += v[i];
+                            break;
+                        }
+                    }
+
+                    for (int i = 0; i < t.Length; i++)
+                    {
+                        string[] temp = t[i].Split(':');
+                        NrArticoleClasa += Convert.ToInt32(temp[1]);
+                    }
+
+
+                    if (RepartiePeClase.ContainsKey(clasa))
+                    {
+                        RepartiePeClase[clasa] += NrArticoleClasa;
+                    }
+                    else if (!RepartiePeClase.ContainsKey(clasa))
+                    {
+                        RepartiePeClase.Add(clasa, NrArticoleClasa);
+                    }
+
+                    NrArticoleTotal += NrArticoleClasa;
+                    NrArticoleClasa = 0;
+
+                }
+            }
+
+            Entropia(RepartiePeClase, NrArticoleTotal);
+        }
+
 
     }
 }
