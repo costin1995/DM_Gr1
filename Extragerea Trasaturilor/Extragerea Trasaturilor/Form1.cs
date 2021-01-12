@@ -258,7 +258,7 @@ namespace Extragerea_Trasaturilor
 
             while ((linieDinFisier = streamReader.ReadLine()) != null)
             {
-                if ((linieDinFisier.StartsWith("@")) || (linieDinFisier == ""));
+                if ((linieDinFisier.StartsWith("@")) || (linieDinFisier == "")){}
                 else
                 {
                     int index = linieDinFisier.IndexOf("#");
