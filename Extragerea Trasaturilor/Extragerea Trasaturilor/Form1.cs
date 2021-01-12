@@ -19,9 +19,9 @@ namespace Extragerea_Trasaturilor
         private PorterStemmer porterStemmer;
         List<Article> ListaXml = new List<Article>();
         List<Dictionary<int, int>> vectRar = new List<Dictionary<int, int>>();
-        Dictionary<string, int> RepartiePeClase = new Dictionary<string, int>();
-        int NrArticoleClasa = 0;
-        double NrArticoleTotal = 0;
+        List<Tuple<string, string>> docInfo = new List<Tuple<string, string>>(); 
+
+
 
         
 
@@ -31,6 +31,8 @@ namespace Extragerea_Trasaturilor
             globalDictionary = new List<string>();
             stopwords = new List<string>();
             porterStemmer = new PorterStemmer();
+
+            
         }
 
         //======Metode pentru a extrage cuvintele din string===============
@@ -211,11 +213,15 @@ namespace Extragerea_Trasaturilor
                         linie = linie + " " + v;
                     }
                     linie = linie + " # " + ListaXml[i].GetData_Set();
+                    docInfo.Add(Tuple.Create(temp[0], ListaXml[i].GetData_Set()));
                     fisier.WriteLine(linie);
 
                 }
-
+            EntropieApareCuvant(vectRar, docInfo);
+            EntropieNuApareCuvant(vectRar, docInfo);
+            EntropieTotala(docInfo);
             MessageBox.Show("File is write", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        
         }
 
         public double Entropia(Dictionary<string, int> repartitiaPeClase, double nrTotalElmente)
@@ -250,56 +256,105 @@ namespace Extragerea_Trasaturilor
 
             return vectorNormalizat;
         }
-
-        public void RepartitiePeClase()
+        public List<double> EntropieApareCuvant(List<Dictionary<int,int>> date, List<Tuple<string,string>> dataInfo)
         {
-            StreamReader streamReader = new StreamReader("./../../Inputdata/trasaturiExtraseFisiereXML.txt");
-            string linieDinFisier;
+            List<double> entropyList = new List<double>();
 
-            while ((linieDinFisier = streamReader.ReadLine()) != null)
+            foreach (var cuv in globalDictionary)
             {
-                if ((linieDinFisier.StartsWith("@")) || (linieDinFisier == "")){}
-                else
+                Dictionary<string, int> tempDictionary = new Dictionary<string, int>();
+                int key = globalDictionary.IndexOf(cuv);
+                int count = 0; //de cate ori apare cuvantul in toate documentele
+
+                foreach (var doc in vectRar)
                 {
-                    int index = linieDinFisier.IndexOf("#");
-                    string[] t = linieDinFisier.Substring(0, index - 1).Split();
-                    string[] v = linieDinFisier.Substring(index).Split();
-                    string clasa = "";
-                    for (int i = 0; i < v.Length; i++)
+                    if (doc.ContainsKey(key))
                     {
-                        if (v[i].StartsWith("C"))
+                        int indexDoc = vectRar.IndexOf(doc);
+
+                        if (tempDictionary.ContainsKey(dataInfo[indexDoc].Item1))
                         {
-                            clasa += v[i];
-                            break;
+                            int tempValue;
+                            tempDictionary.TryGetValue(dataInfo[indexDoc].Item1, out tempValue);
+                            tempDictionary[dataInfo[indexDoc].Item1] = tempValue + 1;
+                            count++;
+                                                             
+                        }
+                        else
+                        {
+                            tempDictionary.Add(dataInfo[indexDoc].Item1, 1);
+                            count++;
                         }
                     }
-
-                    for (int i = 0; i < t.Length; i++)
-                    {
-                        string[] temp = t[i].Split(':');
-                        NrArticoleClasa += Convert.ToInt32(temp[1]);
-                    }
-
-
-                    if (RepartiePeClase.ContainsKey(clasa))
-                    {
-                        RepartiePeClase[clasa] += NrArticoleClasa;
-                    }
-                    else if (!RepartiePeClase.ContainsKey(clasa))
-                    {
-                        RepartiePeClase.Add(clasa, NrArticoleClasa);
-                    }
-
-                    NrArticoleTotal += NrArticoleClasa;
-                    NrArticoleClasa = 0;
-
                 }
+                entropyList.Add(Entropia(tempDictionary, count));
             }
 
-            Entropia(RepartiePeClase, NrArticoleTotal);
+            return entropyList;
+
         }
 
+        public List<double> EntropieNuApareCuvant(List<Dictionary<int, int>> date, List<Tuple<string, string>> dataInfo)
+        {
+            List<double> entropyList = new List<double>();
 
+            foreach (var cuv in globalDictionary)
+            {
+                Dictionary<string, int> tempDictionary = new Dictionary<string, int>();
+                int key = globalDictionary.IndexOf(cuv);
+                int count = 0; //de cate ori apare cuvantul in toate documentele
+
+                foreach (var doc in vectRar)
+                {
+                    if (!doc.ContainsKey(key))
+                    {
+                        int indexDoc = vectRar.IndexOf(doc);
+
+                        if (tempDictionary.ContainsKey(dataInfo[indexDoc].Item1))
+                        {
+                            int tempValue;
+                            tempDictionary.TryGetValue(dataInfo[indexDoc].Item1, out tempValue);
+                            tempDictionary[dataInfo[indexDoc].Item1] = tempValue + 1;
+                            count++;
+
+                        }
+                        else
+                        {
+                            tempDictionary.Add(dataInfo[indexDoc].Item1, 1);
+                            count++;
+                        }
+                    }
+                }
+                entropyList.Add(Entropia(tempDictionary, count));
+            }
+
+            return entropyList;
+
+        }
+        public double EntropieTotala(List<Tuple<string, string>> dataInfo)
+        {
+            Dictionary<string, int> repartitiePeClase = new Dictionary<string, int>();
+          
+            foreach (var info in dataInfo)
+            {
+                string keyClass = info.Item1;
+                if (repartitiePeClase.ContainsKey(keyClass))
+                {
+                    int tempValue;
+                    repartitiePeClase.TryGetValue(keyClass, out tempValue);
+                    repartitiePeClase[keyClass] = tempValue + 1;
+                    
+
+                }
+                else
+                {
+                    repartitiePeClase.Add(keyClass, 1);
+                    
+                }
+            }
+            
+            return Entropia(repartitiePeClase, dataInfo.Count);
+        }
     }
 }
 
