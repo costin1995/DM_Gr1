@@ -217,7 +217,7 @@ namespace Extragerea_Trasaturilor
                     fisier.WriteLine(linie);
 
                 }
-
+            NormalizareBinara(vectRar[16]);
             List<double> gainList = Gain();
             MessageBox.Show("File is write", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
         
@@ -240,17 +240,18 @@ namespace Extragerea_Trasaturilor
 
             Dictionary<int, int> vectorNormalizat = new Dictionary<int, int>();
 
-            foreach (KeyValuePair<int, int> kvp in vectorRar)
+            foreach (var word in globalDictionary)
             {
-                if (kvp.Value == 0)
+                int key = globalDictionary.IndexOf(word);
+
+                if (vectorRar.ContainsKey(key))
                 {
-                    vectorNormalizat[kvp.Key] = 0;
+                    vectorNormalizat.Add(key, 1);
                 }
-                else 
+                else
                 {
-                    vectorNormalizat[kvp.Key] = 1;
+                    vectorNormalizat.Add(key, 0);
                 }
-                
             }
 
             return vectorNormalizat;
@@ -259,10 +260,10 @@ namespace Extragerea_Trasaturilor
         {
             List<Tuple<double, double>> entropyList = new List<Tuple<double, double>>();
 
-            foreach (var cuv in globalDictionary)
+            foreach (var word in globalDictionary)
             {
                 Dictionary<string, int> tempDictionary = new Dictionary<string, int>();
-                int key = globalDictionary.IndexOf(cuv);
+                int key = globalDictionary.IndexOf(word);
                 int count = 0; //de cate ori apare cuvantul in toate documentele
 
                 foreach (var doc in vectRar)
@@ -298,10 +299,10 @@ namespace Extragerea_Trasaturilor
         {
             List<Tuple<double, double>> entropyList = new List<Tuple<double, double>>();
 
-            foreach (var cuv in globalDictionary)
+            foreach (var word in globalDictionary)
             {
                 Dictionary<string, int> tempDictionary = new Dictionary<string, int>();
-                int key = globalDictionary.IndexOf(cuv);
+                int key = globalDictionary.IndexOf(word);
                 int count = 0; //de cate ori apare cuvantul in toate documentele
 
                 foreach (var doc in vectRar)
