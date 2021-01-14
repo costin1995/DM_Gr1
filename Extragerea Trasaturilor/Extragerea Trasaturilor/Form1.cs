@@ -217,14 +217,13 @@ namespace Extragerea_Trasaturilor
                     fisier.WriteLine(linie);
 
                 }
-            EntropieApareCuvant(vectRar, docInfo);
-            EntropieNuApareCuvant(vectRar, docInfo);
-            EntropieTotala(docInfo);
+
+            List<double> gainList = Gain();
             MessageBox.Show("File is write", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
         
         }
 
-        public double Entropia(Dictionary<string, int> repartitiaPeClase, double nrTotalElmente)
+        public double Entropy(Dictionary<string, int> repartitiaPeClase, double nrTotalElmente)
         {
             double valEntropie = 0;
             foreach (KeyValuePair<string, int> kvp in repartitiaPeClase)
@@ -256,9 +255,9 @@ namespace Extragerea_Trasaturilor
 
             return vectorNormalizat;
         }
-        public List<double> EntropieApareCuvant(List<Dictionary<int,int>> date, List<Tuple<string,string>> dataInfo)
+        public List<Tuple<double, double>> EntropyWordInClass(List<Tuple<string, string>> dataInfo)
         {
-            List<double> entropyList = new List<double>();
+            List<Tuple<double, double>> entropyList = new List<Tuple<double, double>>();
 
             foreach (var cuv in globalDictionary)
             {
@@ -278,7 +277,7 @@ namespace Extragerea_Trasaturilor
                             tempDictionary.TryGetValue(dataInfo[indexDoc].Item1, out tempValue);
                             tempDictionary[dataInfo[indexDoc].Item1] = tempValue + 1;
                             count++;
-                                                             
+
                         }
                         else
                         {
@@ -287,16 +286,17 @@ namespace Extragerea_Trasaturilor
                         }
                     }
                 }
-                entropyList.Add(Entropia(tempDictionary, count));
+
+                entropyList.Add(Tuple.Create(Entropy(tempDictionary, count), Convert.ToDouble(count)));
             }
 
             return entropyList;
 
         }
 
-        public List<double> EntropieNuApareCuvant(List<Dictionary<int, int>> date, List<Tuple<string, string>> dataInfo)
+        public List<Tuple<double, double>> EntropyWordNotInClass(List<Tuple<string, string>> dataInfo)
         {
-            List<double> entropyList = new List<double>();
+            List<Tuple<double, double>> entropyList = new List<Tuple<double, double>>();
 
             foreach (var cuv in globalDictionary)
             {
@@ -325,7 +325,7 @@ namespace Extragerea_Trasaturilor
                         }
                     }
                 }
-                entropyList.Add(Entropia(tempDictionary, count));
+                entropyList.Add(Tuple.Create(Entropy(tempDictionary, count), Convert.ToDouble(count)));
             }
 
             return entropyList;
@@ -343,8 +343,6 @@ namespace Extragerea_Trasaturilor
                     int tempValue;
                     repartitiePeClase.TryGetValue(keyClass, out tempValue);
                     repartitiePeClase[keyClass] = tempValue + 1;
-                    
-
                 }
                 else
                 {
@@ -353,7 +351,25 @@ namespace Extragerea_Trasaturilor
                 }
             }
             
-            return Entropia(repartitiePeClase, dataInfo.Count);
+            return Entropy(repartitiePeClase, dataInfo.Count);
+        }
+
+        public List<double> Gain()
+        {
+            List<double> gainList = new List<double>();
+            List<Tuple<double, double>> entropyWordInClass = EntropyWordInClass(docInfo);
+            List<Tuple<double, double>> entropyWordNotInClass = EntropyWordNotInClass(docInfo);
+            double totalEntropy = EntropieTotala(docInfo);
+
+            foreach (var word in globalDictionary)
+            {
+                int index = globalDictionary.IndexOf(word);
+                double inClass = (entropyWordInClass[index].Item2 / (entropyWordInClass[index].Item2 + entropyWordNotInClass[index].Item2)) * entropyWordInClass[index].Item1;
+                double notInClass= (entropyWordNotInClass[index].Item2 / (entropyWordInClass[index].Item2 + entropyWordNotInClass[index].Item2)) * entropyWordNotInClass[index].Item1;
+                double gain = totalEntropy - inClass - notInClass;
+                gainList.Add(gain);
+            }
+            return gainList; 
         }
     }
 }
