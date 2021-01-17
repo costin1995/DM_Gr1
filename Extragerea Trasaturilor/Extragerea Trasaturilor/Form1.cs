@@ -356,35 +356,31 @@ namespace Extragerea_Trasaturilor
         }
 
 
-        public double DistantaManhatten(List<Dictionary<int, int>> vect1, List<Dictionary<int, int>> vect2)
+        public double DistantaManhatten(Dictionary<int, int> vect1, Dictionary<int, int> vect2)
         {
             double distanta = 0;
-            double a = 0;
-            double b = 0;
 
             for(int i=0;i<vect1.Count();i++)
             {
-                a = vect1[i][0];
-                b = vect2[i][0];
-                distanta += Math.Abs(a - b);      
+                distanta += Math.Abs(vect1[i] - vect2[i]);      
             }     
          
             return distanta;
         }
 
-        public Dictionary<int, int> NormalizareCornellSmart(Dictionary<int, int> vectorRar)
+        public Dictionary<int, double> NormalizareCornellSmart(Dictionary<int, int> vectorRar)
         {
 
-            Dictionary<int, int> vectorNormalizat = new Dictionary<int, int>();
+            Dictionary<int, double> vectorNormalizat = new Dictionary<int, double>();
 
             foreach (var word in globalDictionary)
             {
                 int key = globalDictionary.IndexOf(word);
-                int x;
+                double x;
 
                 if (vectorRar.ContainsKey(key))
                 {                  
-                    x = (int)( 1 + Math.Log10(1 + Math.Log10(vectorRar[key])));
+                    x = 1 + Math.Log10(1 + Math.Log10(vectorRar[key]));
                     vectorNormalizat.Add(key, x);
                 }
                 else
