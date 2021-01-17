@@ -19,12 +19,20 @@ namespace Extragerea_Trasaturilor
         private PorterStemmer porterStemmer;
         List<Article> ListaXml = new List<Article>();
         List<Dictionary<int, int>> vectRar = new List<Dictionary<int, int>>();
+        List<Tuple<string, string>> docInfo = new List<Tuple<string, string>>(); 
+
+
+
+        
+
         public Form1()
         {
             InitializeComponent();
             globalDictionary = new List<string>();
             stopwords = new List<string>();
             porterStemmer = new PorterStemmer();
+
+            
         }
 
         //======Metode pentru a extrage cuvintele din string===============
@@ -205,14 +213,17 @@ namespace Extragerea_Trasaturilor
                         linie = linie + " " + v;
                     }
                     linie = linie + " # " + ListaXml[i].GetData_Set();
+                    docInfo.Add(Tuple.Create(temp[0], ListaXml[i].GetData_Set()));
                     fisier.WriteLine(linie);
 
                 }
-
+            NormalizareBinara(vectRar[16]);
+            List<double> gainList = Gain();
             MessageBox.Show("File is write", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        
         }
 
-        public double Entropia(Dictionary<string, int> repartitiaPeClase, double nrTotalElmente)
+        public double Entropy(Dictionary<string, int> repartitiaPeClase, double nrTotalElmente)
         {
             double valEntropie = 0;
             foreach (KeyValuePair<string, int> kvp in repartitiaPeClase)
@@ -229,25 +240,138 @@ namespace Extragerea_Trasaturilor
 
             Dictionary<int, int> vectorNormalizat = new Dictionary<int, int>();
 
-            foreach (KeyValuePair<int, int> kvp in vectorRar)
+            foreach (var word in globalDictionary)
             {
-                if (kvp.Value == 0)
+                int key = globalDictionary.IndexOf(word);
+
+                if (vectorRar.ContainsKey(key))
                 {
-                    vectorNormalizat[kvp.Key] = 0;
+                    vectorNormalizat.Add(key, 1);
                 }
-                else 
+                else
                 {
-                    vectorNormalizat[kvp.Key] = 1;
+                    vectorNormalizat.Add(key, 0);
                 }
-                
             }
 
             return vectorNormalizat;
         }
+        public List<Tuple<double, double>> EntropyWordInClass(List<Tuple<string, string>> dataInfo)
+        {
+            List<Tuple<double, double>> entropyList = new List<Tuple<double, double>>();
 
-       
+            foreach (var word in globalDictionary)
+            {
+                Dictionary<string, int> tempDictionary = new Dictionary<string, int>();
+                int key = globalDictionary.IndexOf(word);
+                int count = 0; //de cate ori apare cuvantul in toate documentele
 
+                foreach (var doc in vectRar)
+                {
+                    if (doc.ContainsKey(key))
+                    {
+                        int indexDoc = vectRar.IndexOf(doc);
 
+                        if (tempDictionary.ContainsKey(dataInfo[indexDoc].Item1))
+                        {
+                            int tempValue;
+                            tempDictionary.TryGetValue(dataInfo[indexDoc].Item1, out tempValue);
+                            tempDictionary[dataInfo[indexDoc].Item1] = tempValue + 1;
+                            count++;
+
+                        }
+                        else
+                        {
+                            tempDictionary.Add(dataInfo[indexDoc].Item1, 1);
+                            count++;
+                        }
+                    }
+                }
+
+                entropyList.Add(Tuple.Create(Entropy(tempDictionary, count), Convert.ToDouble(count)));
+            }
+
+            return entropyList;
+
+        }
+
+        public List<Tuple<double, double>> EntropyWordNotInClass(List<Tuple<string, string>> dataInfo)
+        {
+            List<Tuple<double, double>> entropyList = new List<Tuple<double, double>>();
+
+            foreach (var word in globalDictionary)
+            {
+                Dictionary<string, int> tempDictionary = new Dictionary<string, int>();
+                int key = globalDictionary.IndexOf(word);
+                int count = 0; //de cate ori apare cuvantul in toate documentele
+
+                foreach (var doc in vectRar)
+                {
+                    if (!doc.ContainsKey(key))
+                    {
+                        int indexDoc = vectRar.IndexOf(doc);
+
+                        if (tempDictionary.ContainsKey(dataInfo[indexDoc].Item1))
+                        {
+                            int tempValue;
+                            tempDictionary.TryGetValue(dataInfo[indexDoc].Item1, out tempValue);
+                            tempDictionary[dataInfo[indexDoc].Item1] = tempValue + 1;
+                            count++;
+
+                        }
+                        else
+                        {
+                            tempDictionary.Add(dataInfo[indexDoc].Item1, 1);
+                            count++;
+                        }
+                    }
+                }
+                entropyList.Add(Tuple.Create(Entropy(tempDictionary, count), Convert.ToDouble(count)));
+            }
+
+            return entropyList;
+
+        }
+        public double EntropieTotala(List<Tuple<string, string>> dataInfo)
+        {
+            Dictionary<string, int> repartitiePeClase = new Dictionary<string, int>();
+          
+            foreach (var info in dataInfo)
+            {
+                string keyClass = info.Item1;
+                if (repartitiePeClase.ContainsKey(keyClass))
+                {
+                    int tempValue;
+                    repartitiePeClase.TryGetValue(keyClass, out tempValue);
+                    repartitiePeClase[keyClass] = tempValue + 1;
+                }
+                else
+                {
+                    repartitiePeClase.Add(keyClass, 1);
+                    
+                }
+            }
+            
+            return Entropy(repartitiePeClase, dataInfo.Count);
+        }
+
+        public List<double> Gain()
+        {
+            List<double> gainList = new List<double>();
+            List<Tuple<double, double>> entropyWordInClass = EntropyWordInClass(docInfo);
+            List<Tuple<double, double>> entropyWordNotInClass = EntropyWordNotInClass(docInfo);
+            double totalEntropy = EntropieTotala(docInfo);
+
+            foreach (var word in globalDictionary)
+            {
+                int index = globalDictionary.IndexOf(word);
+                double inClass = (entropyWordInClass[index].Item2 / (entropyWordInClass[index].Item2 + entropyWordNotInClass[index].Item2)) * entropyWordInClass[index].Item1;
+                double notInClass= (entropyWordNotInClass[index].Item2 / (entropyWordInClass[index].Item2 + entropyWordNotInClass[index].Item2)) * entropyWordNotInClass[index].Item1;
+                double gain = totalEntropy - inClass - notInClass;
+                gainList.Add(gain);
+            }
+            return gainList; 
+        }
     }
 }
 
