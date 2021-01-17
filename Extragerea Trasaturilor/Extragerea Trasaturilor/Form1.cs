@@ -440,7 +440,7 @@ namespace Extragerea_Trasaturilor
             {
                 for (int i = 0; i < gainList.Count; i++)
                 {
-                    sw.WriteLine("@attribute atrib" + (i+1).ToString() + " " + gainList[i]);
+                    sw.WriteLine("@attribute atrib" + (i + 1).ToString() + " " + gainList[i]);
                 }
 
                 sw.WriteLine("@data");
@@ -502,6 +502,32 @@ namespace Extragerea_Trasaturilor
             for (int i = 0; i < tempVectorRar.Count; i++)
             {
                 vectorNormalizat[i] = Convert.ToDouble(tempVectorRar[i]) / sumaVectoriRari;
+
+            }
+            return vectorNormalizat;
+        }
+
+        public Dictionary<int, double> NormalizareNominala(Dictionary<int, int> vectorRar)
+        {
+            Dictionary<int, int> tempVectorRar = new Dictionary<int, int>();
+            Dictionary<int, double> vectorNormalizat = new Dictionary<int, double>();
+            foreach (var word in globalDictionary)
+            {
+                int key = globalDictionary.IndexOf(word);
+                if (vectorRar.ContainsKey(key))
+                {
+                    tempVectorRar.Add(key, vectorRar[key]);
+                }
+                else
+                {
+                    tempVectorRar.Add(key, 0);
+                }
+            }
+
+            double maxVectorRar = tempVectorRar.Values.Max();
+            for (int i = 0; i < tempVectorRar.Count; i++)
+            {
+                vectorNormalizat[i] = Convert.ToDouble(tempVectorRar[i]) / maxVectorRar;
 
             }
             return vectorNormalizat;
