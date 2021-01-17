@@ -219,7 +219,7 @@ namespace Extragerea_Trasaturilor
                 }
             // NormalizareBinara(vectRar[16]);
             gainList = Gain();
-            MessageBox.Show("File is write", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            MessageBox.Show("File is written", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
         }
 
@@ -464,6 +464,60 @@ namespace Extragerea_Trasaturilor
                 }
             }
         }
+
+        public double DistantaEuclidiana(Dictionary<int, int> vect1, Dictionary<int, int> vect2)
+        {
+            double distanta = 0;
+
+            for (int i = 0; i < vect1.Count(); i++)
+            {
+                distanta += Math.Pow((vect1[i] - vect2[i]), 2);
+            }
+
+            distanta = Math.Sqrt(distanta);
+
+            return distanta;
+        }
+
+
+        public Dictionary<int, double> NormalizareSuma1(Dictionary<int, int> vectorRar)
+        {
+
+            Dictionary<int, double> vectorNormalizat = new Dictionary<int, double>();
+            double sumaVectoriRari = 0;
+
+            foreach (var word in globalDictionary)
+            {
+                int key = globalDictionary.IndexOf(word);
+
+                if (vectorRar.ContainsKey(key))
+                {
+                    sumaVectoriRari += vectorRar[key];
+                }
+
+            }
+
+
+            foreach (var word in globalDictionary)
+            {
+                int key = globalDictionary.IndexOf(word);
+                double x;
+
+                if (vectorRar.ContainsKey(key))
+                {
+                    x = vectorRar[key] / sumaVectoriRari;
+                    vectorNormalizat.Add(key, x);
+                }
+                else
+                {
+                    vectorNormalizat.Add(key, 0);
+                }
+            }
+
+            return vectorNormalizat;
+        }
+
+
     }
 }
 
