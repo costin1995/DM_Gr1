@@ -19,11 +19,11 @@ namespace Extragerea_Trasaturilor
         private PorterStemmer porterStemmer;
         List<Article> ListaXml = new List<Article>();
         List<Dictionary<int, int>> vectRar = new List<Dictionary<int, int>>();
-        List<Tuple<string, string>> docInfo = new List<Tuple<string, string>>(); 
+        List<Tuple<string, string>> docInfo = new List<Tuple<string, string>>();
+        List<double> gainList = new List<double>();
 
 
 
-        
 
         public Form1()
         {
@@ -32,7 +32,7 @@ namespace Extragerea_Trasaturilor
             stopwords = new List<string>();
             porterStemmer = new PorterStemmer();
 
-            
+
         }
 
         //======Metode pentru a extrage cuvintele din string===============
@@ -217,10 +217,10 @@ namespace Extragerea_Trasaturilor
                     fisier.WriteLine(linie);
 
                 }
-            NormalizareBinara(vectRar[16]);
-            List<double> gainList = Gain();
+            // NormalizareBinara(vectRar[16]);
+            gainList = Gain();
             MessageBox.Show("File is write", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
-        
+
         }
 
         public double Entropy(Dictionary<string, int> repartitiaPeClase, double nrTotalElmente)
@@ -335,7 +335,7 @@ namespace Extragerea_Trasaturilor
         public double EntropieTotala(List<Tuple<string, string>> dataInfo)
         {
             Dictionary<string, int> repartitiePeClase = new Dictionary<string, int>();
-          
+
             foreach (var info in dataInfo)
             {
                 string keyClass = info.Item1;
@@ -348,10 +348,10 @@ namespace Extragerea_Trasaturilor
                 else
                 {
                     repartitiePeClase.Add(keyClass, 1);
-                    
+
                 }
             }
-            
+
             return Entropy(repartitiePeClase, dataInfo.Count);
         }
 
@@ -360,11 +360,11 @@ namespace Extragerea_Trasaturilor
         {
             double distanta = 0;
 
-            for(int i=0;i<vect1.Count();i++)
+            for (int i = 0; i < vect1.Count(); i++)
             {
-                distanta += Math.Abs(vect1[i] - vect2[i]);      
-            }     
-         
+                distanta += Math.Abs(vect1[i] - vect2[i]);
+            }
+
             return distanta;
         }
 
@@ -379,7 +379,7 @@ namespace Extragerea_Trasaturilor
                 double x;
 
                 if (vectorRar.ContainsKey(key))
-                {                  
+                {
                     x = 1 + Math.Log10(1 + Math.Log10(vectorRar[key]));
                     vectorNormalizat.Add(key, x);
                 }
@@ -404,11 +404,65 @@ namespace Extragerea_Trasaturilor
             {
                 int index = globalDictionary.IndexOf(word);
                 double inClass = (entropyWordInClass[index].Item2 / (entropyWordInClass[index].Item2 + entropyWordNotInClass[index].Item2)) * entropyWordInClass[index].Item1;
-                double notInClass= (entropyWordNotInClass[index].Item2 / (entropyWordInClass[index].Item2 + entropyWordNotInClass[index].Item2)) * entropyWordNotInClass[index].Item1;
+                double notInClass = (entropyWordNotInClass[index].Item2 / (entropyWordInClass[index].Item2 + entropyWordNotInClass[index].Item2)) * entropyWordNotInClass[index].Item1;
                 double gain = totalEntropy - inClass - notInClass;
                 gainList.Add(gain);
             }
-            return gainList; 
+            return gainList;
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            double prag = Convert.ToDouble(numericUpDown1.Value);
+
+            foreach (double castig in gainList.ToList())
+            {
+                if (castig < prag)
+                {
+                    int index = gainList.IndexOf(castig);
+
+                    /*for (var i = 0; i < vectRar.Count(); i++)
+                    {
+                        foreach (KeyValuePair<int, int> kvp in vectRar[i])
+                        {
+                            vectRar.RemoveAt(index);
+                        }
+                    }*/
+
+                    globalDictionary.RemoveAt(index);
+                    gainList.RemoveAt(index);
+
+                }
+            }
+
+            using (StreamWriter sw = new StreamWriter("./../../InputData/SelectiaTrasaturilor.txt"))
+            {
+                for (int i = 0; i < gainList.Count; i++)
+                {
+                    sw.WriteLine("@attribute atrib" + (i+1).ToString() + " " + gainList[i]);
+                }
+
+                sw.WriteLine("@data");
+
+                for (var i = 0; i < vectRar.Count(); i++)
+                {
+                    string linie = "";
+
+                    foreach (KeyValuePair<int, int> kvp in vectRar[i])
+                    {
+                        linie = linie + kvp.Key.ToString() + ":" + kvp.Value.ToString() + " ";
+                    }
+                    List<string> temp = ListaXml[i].GetClassCodes();
+                    linie = linie + "#";
+                    foreach (string v in temp)
+                    {
+                        linie = linie + " " + v;
+                    }
+                    linie = linie + " # " + ListaXml[i].GetData_Set();
+                    sw.WriteLine(linie);
+
+                }
+            }
         }
     }
 }
