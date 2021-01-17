@@ -217,7 +217,8 @@ namespace Extragerea_Trasaturilor
                     fisier.WriteLine(linie);
 
                 }
-            // NormalizareBinara(vectRar[16]);
+
+            //NormalizareBinara(vectRar[16]);
             gainList = Gain();
             MessageBox.Show("File is written", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
@@ -482,40 +483,30 @@ namespace Extragerea_Trasaturilor
 
         public Dictionary<int, double> NormalizareSuma1(Dictionary<int, int> vectorRar)
         {
-
+            Dictionary<int, int> tempVectorRar = new Dictionary<int, int>();
             Dictionary<int, double> vectorNormalizat = new Dictionary<int, double>();
-            double sumaVectoriRari = 0;
-
             foreach (var word in globalDictionary)
             {
                 int key = globalDictionary.IndexOf(word);
-
                 if (vectorRar.ContainsKey(key))
                 {
-                    sumaVectoriRari += vectorRar[key];
-                }
-
-            }
-
-
-            foreach (var word in globalDictionary)
-            {
-                int key = globalDictionary.IndexOf(word);
-                double x;
-
-                if (vectorRar.ContainsKey(key))
-                {
-                    x = vectorRar[key] / sumaVectoriRari;
-                    vectorNormalizat.Add(key, x);
+                    tempVectorRar.Add(key, vectorRar[key]);
                 }
                 else
                 {
-                    vectorNormalizat.Add(key, 0);
+                    tempVectorRar.Add(key, 0);
                 }
             }
 
+            double sumaVectoriRari = vectorRar.Values.Sum();
+            for (int i = 0; i < tempVectorRar.Count; i++)
+            {
+                vectorNormalizat[i] = Convert.ToDouble(tempVectorRar[i]) / sumaVectoriRari;
+
+            }
             return vectorNormalizat;
         }
+
 
 
     }
