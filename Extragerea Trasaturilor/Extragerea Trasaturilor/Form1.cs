@@ -498,7 +498,7 @@ namespace Extragerea_Trasaturilor
                 }
             }
 
-            double sumaVectoriRari = vectorRar.Values.Sum();
+            double sumaVectoriRari = tempVectorRar.Values.Sum();
             for (int i = 0; i < tempVectorRar.Count; i++)
             {
                 vectorNormalizat[i] = Convert.ToDouble(tempVectorRar[i]) / sumaVectoriRari;
