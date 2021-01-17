@@ -355,6 +355,48 @@ namespace Extragerea_Trasaturilor
             return Entropy(repartitiePeClase, dataInfo.Count);
         }
 
+
+        public double DistantaManhatten(List<Dictionary<int, int>> vect1, List<Dictionary<int, int>> vect2)
+        {
+            double distanta = 0;
+            double a = 0;
+            double b = 0;
+
+            for(int i=0;i<vect1.Count();i++)
+            {
+                a = vect1[i][0];
+                b = vect2[i][0];
+                distanta += Math.Abs(a - b);      
+            }     
+         
+            return distanta;
+        }
+
+        public Dictionary<int, int> NormalizareCornellSmart(Dictionary<int, int> vectorRar)
+        {
+
+            Dictionary<int, int> vectorNormalizat = new Dictionary<int, int>();
+
+            foreach (var word in globalDictionary)
+            {
+                int key = globalDictionary.IndexOf(word);
+                int x;
+
+                if (vectorRar.ContainsKey(key))
+                {                  
+                    x = (int)( 1 + Math.Log10(1 + Math.Log10(vectorRar[key])));
+                    vectorNormalizat.Add(key, x);
+                }
+                else
+                {
+                    vectorNormalizat.Add(key, 0);
+                }
+            }
+
+            return vectorNormalizat;
+        }
+
+
         public List<double> Gain()
         {
             List<double> gainList = new List<double>();
