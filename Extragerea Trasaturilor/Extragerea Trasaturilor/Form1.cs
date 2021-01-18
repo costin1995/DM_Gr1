@@ -23,7 +23,7 @@ namespace Extragerea_Trasaturilor
 
         List<double> gainList = new List<double>();
 
-        List<Dictionary<int, int>> vectRarTest= new List<Dictionary<int, int>>();
+        List<Dictionary<int, int>> vectRarTest = new List<Dictionary<int, int>>();
         List<Dictionary<int, int>> vectRarTraining = new List<Dictionary<int, int>>();
 
         List<string> docInfoTest = new List<string>();
@@ -32,6 +32,8 @@ namespace Extragerea_Trasaturilor
         List<Dictionary<int, double>> dateTrainingNormalizate = new List<Dictionary<int, double>>();
         List<Dictionary<int, double>> dateTestNormalizate = new List<Dictionary<int, double>>();
 
+
+        List<List<Tuple<double, string>>> distante = new List<List<Tuple<double, string>>>();
 
         public Form1()
         {
@@ -366,7 +368,7 @@ namespace Extragerea_Trasaturilor
         }
 
 
-        public double DistantaManhatten(Dictionary<int, int> vect1, Dictionary<int, int> vect2)
+        public double DistantaManhatten(Dictionary<int, double> vect1, Dictionary<int, double> vect2)
         {
             double distanta = 0;
 
@@ -433,7 +435,7 @@ namespace Extragerea_Trasaturilor
 
                     for (var i = 0; i < vectRar.Count(); i++)
                     {
-                      vectRar[i].Remove(index); 
+                        vectRar[i].Remove(index);
                     }
 
                     globalDictionary.RemoveAt(index);
@@ -466,7 +468,7 @@ namespace Extragerea_Trasaturilor
             }
         }
 
-        public double DistantaEuclidiana(Dictionary<int, int> vect1, Dictionary<int, int> vect2)
+        public double DistantaEuclidiana(Dictionary<int, double> vect1, Dictionary<int, double> vect2)
         {
             double distanta = 0;
 
@@ -535,40 +537,110 @@ namespace Extragerea_Trasaturilor
 
         private void btnKNN_Click(object sender, EventArgs e)
         {
-            int tipDistanta = 0;
+            int k = Convert.ToInt32(tbK.Text);
+            List<Dictionary<string, int>> contorClase = new List<Dictionary<string, int>>();
+            List<string> afisare = new List<string>();
 
-            if (rbManhattan.Checked)
+            for (int i = 0; i < k; i++)
             {
-                tipDistanta = 1;
+                distante.Add(new List<Tuple<double, string>>());
+
+
+                for (int j = 0; j < dateTrainingNormalizate.Count; j++)
+                {
+                    if (rbManhattan.Checked)
+                    {
+                        distante[i].Add(Tuple.Create(DistantaManhatten(dateTestNormalizate[i], dateTrainingNormalizate[j]), docInfoTraining[j]));
+
+                    }
+                    else if (rbEuclidiana.Checked)
+                    {
+                        distante[i].Add(Tuple.Create(DistantaEuclidiana(dateTestNormalizate[i], dateTrainingNormalizate[j]), docInfoTraining[j]));
+                    }
+                }
             }
-            else if (rbEuclidiana.Checked)
+
+            for (var i = 0; i < distante.Count; i++)
             {
-                tipDistanta = 2;
+                distante[i] = distante[i].OrderBy(t => t.Item1).ToList();
+                distante[i].RemoveRange(k, distante[i].Count - k);
+            }
+
+            for (var i = 0; i < distante.Count; i++)
+            {
+                tbClaseTraining.Text = tbClaseTraining.Text + "Linia " + i.ToString() + Environment.NewLine + Environment.NewLine;
+                for (var j = 0; j < distante[i].Count; j++)
+                {
+                    tbClaseTraining.Text = tbClaseTraining.Text + j.ToString() + " - " + distante[i][j].Item2 + Environment.NewLine;
+                }
+                tbClaseTraining.Text = tbClaseTraining.Text + Environment.NewLine;
+            }
+
+
+            for (var i = 0; i < distante.Count; i++)
+            {
+                contorClase.Add(new Dictionary<string, int>());
+                for (var j = 0; j < distante[i].Count; j++)
+                {
+                    if (contorClase[i].ContainsKey(distante[i][j].Item2))
+                    {
+                        int temp = contorClase[i][distante[i][j].Item2];
+                        contorClase[i][distante[i][j].Item2] = ++temp;
+                    }
+                    else
+                    {
+                        contorClase[i][distante[i][j].Item2] = 1;
+                    }
+                }
+
+            }
+
+            for (var i = 0; i < contorClase.Count; i++)
+            {
+
+                var myKey = contorClase[i].FirstOrDefault(x => x.Value == contorClase[i].Values.Max()).Key;
+                tbClaseRezultate.Text = tbClaseRezultate.Text + "Doc " + i.ToString() + " - " + myKey.ToString() + Environment.NewLine + Environment.NewLine;
             }
         }
 
         private void btnNormalizare_Click(object sender, EventArgs e)
         {
-            for (int i = 0; i < vectRar.Count; i++)
+            for (int i = 0; i < vectRarTraining.Count; i++)
             {
                 if (rbBinara.Checked)
                 {
                     dateTrainingNormalizate.Add(NormalizareBinara(vectRarTraining[i]));
-                    dateTestNormalizate.Add(NormalizareBinara(vectRarTest[i]));
                 }
                 else if (rbCornellSmart.Checked)
                 {
                     dateTrainingNormalizate.Add(NormalizareCornellSmart(vectRarTraining[i]));
-                    dateTestNormalizate.Add(NormalizareCornellSmart(vectRarTest[i]));
                 }
                 else if (rbNominala.Checked)
                 {
                     dateTrainingNormalizate.Add(NormalizareNominala(vectRarTraining[i]));
-                    dateTestNormalizate.Add(NormalizareNominala(vectRarTest[i]));
                 }
                 else if (rbSuma1.Checked)
                 {
                     dateTrainingNormalizate.Add(NormalizareSuma1(vectRarTraining[i]));
+                }
+            }
+
+            for (int i = 0; i < vectRarTest.Count; i++)
+            {
+                if (rbBinara.Checked)
+                {
+                    dateTestNormalizate.Add(NormalizareBinara(vectRarTest[i]));
+                }
+                else if (rbCornellSmart.Checked)
+                {
+                    dateTestNormalizate.Add(NormalizareCornellSmart(vectRarTest[i]));
+                }
+                else if (rbNominala.Checked)
+                {
+                    dateTestNormalizate.Add(NormalizareNominala(vectRarTest[i]));
+                }
+                else if (rbSuma1.Checked)
+                {
                     dateTestNormalizate.Add(NormalizareSuma1(vectRarTest[i]));
                 }
             }
@@ -578,12 +650,12 @@ namespace Extragerea_Trasaturilor
         {
             for (int i = 0; i < vectRar.Count; i++)
             {
-                if(docInfo[i].Item2 == "testing")
+                if (docInfo[i].Item2 == "testing")
                 {
                     vectRarTest.Add(vectRar[i]);
                     docInfoTest.Add(docInfo[i].Item1);
                 }
-                else if(docInfo[i].Item2 == "training")
+                else if (docInfo[i].Item2 == "training")
                 {
                     vectRarTraining.Add(vectRar[i]);
                     docInfoTraining.Add(docInfo[i].Item1);
