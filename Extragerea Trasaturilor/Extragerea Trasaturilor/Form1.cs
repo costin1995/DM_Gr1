@@ -20,9 +20,17 @@ namespace Extragerea_Trasaturilor
         List<Article> ListaXml = new List<Article>();
         List<Dictionary<int, int>> vectRar = new List<Dictionary<int, int>>();
         List<Tuple<string, string>> docInfo = new List<Tuple<string, string>>();
+
         List<double> gainList = new List<double>();
 
+        List<Dictionary<int, int>> vectRarTest= new List<Dictionary<int, int>>();
+        List<Dictionary<int, int>> vectRarTraining = new List<Dictionary<int, int>>();
 
+        List<string> docInfoTest = new List<string>();
+        List<string> docInfoTraining = new List<string>();
+
+        List<Dictionary<int, double>> dateTrainingNormalizate = new List<Dictionary<int, double>>();
+        List<Dictionary<int, double>> dateTestNormalizate = new List<Dictionary<int, double>>();
 
 
         public Form1()
@@ -218,6 +226,7 @@ namespace Extragerea_Trasaturilor
 
                 }
 
+
             //NormalizareBinara(vectRar[16]);
             gainList = Gain();
             MessageBox.Show("File is written", "Information", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -236,10 +245,10 @@ namespace Extragerea_Trasaturilor
             return valEntropie;
         }
 
-        public Dictionary<int, int> NormalizareBinara(Dictionary<int, int> vectorRar)
+        public Dictionary<int, double> NormalizareBinara(Dictionary<int, int> vectorRar)
         {
 
-            Dictionary<int, int> vectorNormalizat = new Dictionary<int, int>();
+            Dictionary<int, double> vectorNormalizat = new Dictionary<int, double>();
 
             foreach (var word in globalDictionary)
             {
@@ -422,13 +431,10 @@ namespace Extragerea_Trasaturilor
                 {
                     int index = gainList.IndexOf(castig);
 
-                    /*for (var i = 0; i < vectRar.Count(); i++)
+                    for (var i = 0; i < vectRar.Count(); i++)
                     {
-                        foreach (KeyValuePair<int, int> kvp in vectRar[i])
-                        {
-                            vectRar.RemoveAt(index);
-                        }
-                    }*/
+                      vectRar[i].Remove(index); 
+                    }
 
                     globalDictionary.RemoveAt(index);
                     gainList.RemoveAt(index);
@@ -453,13 +459,7 @@ namespace Extragerea_Trasaturilor
                     {
                         linie = linie + kvp.Key.ToString() + ":" + kvp.Value.ToString() + " ";
                     }
-                    List<string> temp = ListaXml[i].GetClassCodes();
-                    linie = linie + "#";
-                    foreach (string v in temp)
-                    {
-                        linie = linie + " " + v;
-                    }
-                    linie = linie + " # " + ListaXml[i].GetData_Set();
+                    linie = linie + "#" + docInfo[i].Item1 + " #" + docInfo[i].Item2;
                     sw.WriteLine(linie);
 
                 }
@@ -533,8 +533,111 @@ namespace Extragerea_Trasaturilor
             return vectorNormalizat;
         }
 
+        private void btnKNN_Click(object sender, EventArgs e)
+        {
+            int tipDistanta = 0;
 
+            if (rbManhattan.Checked)
+            {
+                tipDistanta = 1;
+            }
+            else if (rbEuclidiana.Checked)
+            {
+                tipDistanta = 2;
+            }
+        }
 
+        private void btnNormalizare_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < vectRar.Count; i++)
+            {
+                if (rbBinara.Checked)
+                {
+                    dateTrainingNormalizate.Add(NormalizareBinara(vectRarTraining[i]));
+                    dateTestNormalizate.Add(NormalizareBinara(vectRarTest[i]));
+                }
+                else if (rbCornellSmart.Checked)
+                {
+                    dateTrainingNormalizate.Add(NormalizareCornellSmart(vectRarTraining[i]));
+                    dateTestNormalizate.Add(NormalizareCornellSmart(vectRarTest[i]));
+                }
+                else if (rbNominala.Checked)
+                {
+                    dateTrainingNormalizate.Add(NormalizareNominala(vectRarTraining[i]));
+                    dateTestNormalizate.Add(NormalizareNominala(vectRarTest[i]));
+                }
+                else if (rbSuma1.Checked)
+                {
+                    dateTrainingNormalizate.Add(NormalizareSuma1(vectRarTraining[i]));
+                    dateTestNormalizate.Add(NormalizareSuma1(vectRarTest[i]));
+                }
+            }
+        }
+
+        private void btnImpartireDate_Click(object sender, EventArgs e)
+        {
+            for (int i = 0; i < vectRar.Count; i++)
+            {
+                if(docInfo[i].Item2 == "testing")
+                {
+                    vectRarTest.Add(vectRar[i]);
+                    docInfoTest.Add(docInfo[i].Item1);
+                }
+                else if(docInfo[i].Item2 == "training")
+                {
+                    vectRarTraining.Add(vectRar[i]);
+                    docInfoTraining.Add(docInfo[i].Item1);
+                }
+            }
+
+            using (StreamWriter sw = new StreamWriter("./../../InputData/DateTest.txt"))
+            {
+                for (int i = 0; i < gainList.Count; i++)
+                {
+                    sw.WriteLine("@attribute atrib" + (i + 1).ToString() + " " + gainList[i]);
+                }
+
+                sw.WriteLine("@data");
+
+                for (var i = 0; i < vectRarTest.Count(); i++)
+                {
+                    string linie = "";
+
+                    foreach (KeyValuePair<int, int> kvp in vectRarTest[i])
+                    {
+                        linie = linie + kvp.Key.ToString() + ":" + kvp.Value.ToString() + " ";
+                    }
+
+                    linie = linie + "#" + docInfoTest[i];
+                    sw.WriteLine(linie);
+
+                }
+            }
+
+            using (StreamWriter sw = new StreamWriter("./../../InputData/DateTraining.txt"))
+            {
+                for (int i = 0; i < gainList.Count; i++)
+                {
+                    sw.WriteLine("@attribute atrib" + (i + 1).ToString() + " " + gainList[i]);
+                }
+
+                sw.WriteLine("@data");
+
+                for (var i = 0; i < vectRarTraining.Count(); i++)
+                {
+                    string linie = "";
+
+                    foreach (KeyValuePair<int, int> kvp in vectRarTraining[i])
+                    {
+                        linie = linie + kvp.Key.ToString() + ":" + kvp.Value.ToString() + " ";
+                    }
+                    linie = linie + "#" + docInfoTraining[i];
+                    sw.WriteLine(linie);
+
+                }
+            }
+
+        }
     }
 }
 
